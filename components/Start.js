@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ImageBackground, StyleSheet, View, Text, TextInput, Button, Image, TouchableOpacity } from 'react-native';
+import { ImageBackground, StyleSheet, View, Text, TextInput, Button, Image, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const image = require('../img/Background_Image.png');
-  const icon = require('../img/icon.svg');
+  const icon = require('../img/icon.png');
 
   const handleColorSelection = (color) => {
     setSelectedColor(color);
@@ -35,20 +35,33 @@ const Start = ({ navigation }) => {
           <Text style={styles.text1}>Choose Background Color:</Text>
 
           <View style={styles.colorButtonsContainer}>
-            <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#090C08' }]}
+
+          <TouchableOpacity
+              style={[
+                styles.colorButton,
+                { backgroundColor: '#090C08', opacity: selectedColor === '#090C08' ? 1 : 0.7 },
+              ]}
               onPress={() => handleColorSelection('#090C08')}
             />
             <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#474056' }]}
+              style={[
+                styles.colorButton,
+                { backgroundColor: '#474056', opacity: selectedColor === '#474056' ? 1 : 0.7 },
+              ]}
               onPress={() => handleColorSelection('#474056')}
             />
             <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#8A95A5' }]}
+              style={[
+                styles.colorButton,
+                { backgroundColor: '#8A95A5', opacity: selectedColor === '#8A95A5' ? 1 : 0.7 },
+              ]}
               onPress={() => handleColorSelection('#8A95A5')}
             />
             <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#B9C6AE' }]}
+              style={[
+                styles.colorButton,
+                { backgroundColor: '#B9C6AE', opacity: selectedColor === '#B9C6AE' ? 1 : 0.7 },
+              ]}
               onPress={() => handleColorSelection('#B9C6AE')}
             />
           </View>
@@ -59,7 +72,10 @@ const Start = ({ navigation }) => {
             style={styles.buttonStartChatting}
             color="#757083"
           />
+       
         </View>
+        {Platform.OS === "ios"?
+          (<KeyboardAvoidingView behavior="padding" />): null}
       </ImageBackground>
     </View>
   );
@@ -108,8 +124,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#757083',
     padding: 18,
-    marginTop: 15,
-    marginBottom: 15,
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: -10,
+    marginBottom: 10,
     opacity: '50%',
   },
   icon: {
@@ -142,6 +160,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 10,
   },
+  button: {
+    backgroundColor: '#090C08' 
+}
 });
 
 export default Start;
