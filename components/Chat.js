@@ -2,28 +2,54 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
 import {Bubble, GiftedChat } from "react-native-gifted-chat";
 import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Chat = ({ route, navigation, db }) => {
+
+const Chat = ({ route, navigation, db, isConnected }) => {
   const [messages, setMessages] = useState([]);
   const { name, backgroundColor } = route.params;
  
+  const loadCachedMessages = async () => {
+    const cachedMessages = (await AsyncStorage.getItem('messages')) || '[]';
+    setMessages(JSON.parse(cachedMessages));
+  };
+
+  let unsubMessages;
 
   useEffect(() => {
-    navigation.setOptions({ title: name })
+    navigation.setOptions({ title: name });
+
+    if (isConnected === true) {
+      if (unsubMessages) unsubMessages();
+      unsubMessages = null;
+
     const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-    const message = onSnapshot(q,
-       (documentSnapshot) => {
+    unsubMessages = onSnapshot(q,(documentSnapshot) => {
         let newMessages = [];
         documentSnapshot.forEach(doc => {
            newMessages.push({ id: doc.id, ...doc.data(), createdAt: new Date(doc.data().createdAt.toMillis())})
         });
-        setMessages(newMessages);
-       })
 
-       return () => {
-         if( message ) message();
-       };
-  }, []);
+        cachedMessages(newMessages);
+        setMessages(newMessages);
+       }); 
+      }else loadCachedMessages();
+
+       // Clean up function
+    return () => {
+      if (unsubMessages) {
+        unsubMessages();
+      }
+    };
+  }, [isConnected]);
+
+  const cachedMessages = async (messagesToCache) => {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(messagesToCache));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   const onSend = (newMessages) => {
     // setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages))

@@ -5,28 +5,41 @@ import Chat from './components/Chat';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { disableNetwork, enableNetwork, getFirestore } from "firebase/firestore";
+import { useEffect } from "react";
+import { LogBox, Alert } from "react-native";
+
+import { useNetInfo }from '@react-native-community/netinfo';
 
 const Stack = createNativeStackNavigator();
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAG5nAuiwMIc2wMQTdrHuIwCy8igmwiqkE",
-  authDomain: "messages-7e54b.firebaseapp.com",
-  projectId: "messages-7e54b",
-  storageBucket: "messages-7e54b.appspot.com",
-  messagingSenderId: "83935227241",
-  appId: "1:83935227241:web:24557e9edc17fba4d6e1f8"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-import { LogBox } from 'react-native';
 LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
 
 const App = () => {
+  const connectionStatus = useNetInfo();
 
+  useEffect(() => {
+    if (connectionStatus.isConnected === false) {
+      Alert.alert("Connection Lost!");
+      disableNetwork(db);
+    } else if (connectionStatus.isConnected === true) {
+      enableNetwork(db);
+    }
+  }, [connectionStatus.isConnected]);
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAG5nAuiwMIc2wMQTdrHuIwCy8igmwiqkE",
+    authDomain: "messages-7e54b.firebaseapp.com",
+    projectId: "messages-7e54b",
+    storageBucket: "messages-7e54b.appspot.com",
+    messagingSenderId: "83935227241",
+    appId: "1:83935227241:web:24557e9edc17fba4d6e1f8"
+  };
+  
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  
+  const db = getFirestore(app);
 
   return (
     <NavigationContainer>
@@ -37,12 +50,15 @@ const App = () => {
           name="Start"
           component={Start}
         />
-       <Stack.Screen
-  name="Chat"
-  options={({ route }) => ({ title: route.params.name })}
->
-  {(props) => <Chat {...props}  db={db} />}
-</Stack.Screen>
+       <Stack.Screen name="Chat">
+          {(props) => (
+            <Chat
+              db={db}
+              isConnected={connectionStatus.isConnected}
+              {...props}
+            />
+          )}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
