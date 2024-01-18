@@ -71,7 +71,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor}]}>
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
