@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import CustomActions from "./CustomActions";
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
-import {Bubble, GiftedChat } from "react-native-gifted-chat";
+import {Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import MapView from 'react-native-maps';
 
 
-const Chat = ({ route, navigation, db, isConnected }) => {
+
+
+
+
+const Chat = ({ route, navigation, db, isConnected, storage  }) => {
   const [messages, setMessages] = useState([]);
   const { name, backgroundColor } = route.params;
  
@@ -70,12 +76,46 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     />
   }
 
+  const renderInputToolbar = (props) => {
+    if (isConnected === true) return <InputToolbar {...props} />;
+    else return null;
+  }
+
+
+  const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} {...props} />;
+  };
+
+  const renderCustomView = (props) => {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
+
   return (
     <View style={[styles.container, { backgroundColor}]}>
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
+        enderInputToolbar={renderInputToolbar}
         onSend={messages => onSend(messages)}
+        renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
         user={{
           _id: route.params.id,
           name
@@ -87,13 +127,6 @@ const Chat = ({ route, navigation, db, isConnected }) => {
 }
 
 
-//   return (
-//     <View style={[styles.container, { backgroundColor }]}>
-//       <Text style={styles.text}>Chat Screen</Text>
-//       <Text style={styles.name}>User: {name}</Text>
-//     </View>
-//   );
-// };
 
 const styles = StyleSheet.create({
   container: {

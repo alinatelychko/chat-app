@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ImageBackground, StyleSheet, View, Text, TextInput, Button, Image, 
   TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import {getAuth, signInAnonymously} from 'firebase/auth';
-import Chat from './Chat';
+
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
